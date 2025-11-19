@@ -1,0 +1,75 @@
+# cnn_bilstm_args_cpu_test.yaml
+mode: 'train'
+seed: 42
+# gpu_number: 99 # Optional: This would fail CUDA check and default to CPU, or rely on trainer logic
+output_dir: './output/cnn_bilstm_cpu_test' # Different output dir for clarity
+checkpoint_dir: './checkpoints/cnn_bilstm_cpu_test'
+save_best_checkpoint: True
+save_final_model: True
+batches_per_train_log: 5  # Log more frequently for short run
+batches_per_val_step: 10  # Validate every 10 training batches (or at the end if fewer batches)
+num_training_batches: 20  # Run for only 20 batches
+use_amp: False # Disable mixed precision for CPU
+grad_norm_clip_value: 1.0
+lr_max: 3e-4
+lr_min: 3e-6
+lr_scheduler_type: 'cosine'
+lr_decay_steps: 20 # Adjust scheduler steps to match num batches
+weight_decay: 0.01
+beta0: 0.9
+beta1: 0.98
+epsilon: 1e-9
+init_from_checkpoint: False
+init_checkpoint_path: null
+
+model:
+  n_input_features: 512
+  n_units: 128  # Smaller model for faster testing
+  n_cnn_layers: 2 # Fewer layers
+  cnn_dropout: 0.1
+  n_lstm_layers: 1 # Fewer layers
+  lstm_dropout: 0.1
+  input_layer_dropout: 0.1
+  # n_classes: 41  # Move this line OUT of the 'model' section
+  cnn_trainable: True
+  lstm_trainable: True
+  input_network:
+    input_trainable: True
+
+dataset:
+  n_classes: 41 # <-- Move n_classes HERE, under the 'dataset' section
+  dataset_dir: '../data/hdf5_data_final' # Ensure this path is correct relative to where you run the script
+  sessions: ['t15.2023.08.13', 't15.2023.08.18'] # Use a couple of sessions for quick test
+  batch_size: 2 # Much smaller batch size for CPU 
+  days_per_batch: 1
+  num_dataloader_workers: 0 # Set to 0 for CPU debugging
+  loader_shuffle: True
+  dataset_probability_val: [1, 1] # Assuming these sessions are valid for val (handled by dataset.py logic)
+  seed: 42
+  data_transforms:
+    smooth_data: True
+    smooth_kernel_std: 1.0
+    smooth_kernel_size: 5
+    white_noise_std: 0.05
+    constant_offset_std: 0.02
+    random_walk_std: 0.01
+    random_walk_axis: 1
+    random_cut: 5
+    static_gain_std: 0.01
+
+early_stopping: False # Probably disable for a very short test
+early_stopping_val_steps: 5
+save_val_logits: False
+save_all_val_steps: False
+save_val_data: False
+save_val_metrics: True
+log_individual_day_val_PER: True
+log_val_skip_logs: False
+lr_max_day: 1e-3
+lr_min_day: 1e-5
+lr_decay_steps_day: 20 # Adjust scheduler steps for day params
+lr_warmup_steps: 5
+lr_warmup_steps_day: 5
+weight_decay_day: 0.01
+# patch_size: 16  # Include if your model uses patching
+# patch_stride: 16 # Include if your model uses patching

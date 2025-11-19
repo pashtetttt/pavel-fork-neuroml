@@ -1,0 +1,50 @@
+2025-11-19 17:28:31,307: Using device: cpu
+2025-11-19 17:28:31,324: Initialized CNN+BiLSTM decoding model
+2025-11-19 17:28:31,324: NOT using torch.compile for testing on CPU...
+2025-11-19 17:28:31,325: CNNBiLSTMModel(
+  (input_dropout): Dropout(p=0.1, inplace=False)
+  (cnn_layers): Sequential(
+    (0): CNNBlock(
+      (conv): Conv1d(128, 128, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+      (bn): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): GELU(approximate='none')
+      (dropout): Dropout(p=0.1, inplace=False)
+    )
+    (1): CNNBlock(
+      (conv): Conv1d(128, 128, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+      (bn): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): GELU(approximate='none')
+      (dropout): Dropout(p=0.1, inplace=False)
+    )
+  )
+  (lstm): LSTM(128, 64, batch_first=True, bidirectional=True)
+  (out): Linear(in_features=128, out_features=41, bias=True)
+)
+2025-11-19 17:28:31,334: Model has 334,761 parameters
+2025-11-19 17:28:31,335: Model has 131,328 day-specific parameters | 39.23% of total parameters
+2025-11-19 17:28:31,552: Successfully initialized datasets
+2025-11-19 17:28:31,765: Train batch 0: loss: 2735.70 grad norm: 704.10 time: 0.188
+2025-11-19 17:28:31,765: Running test after training batch: 0
+2025-11-19 17:28:35,193: Val batch 0: PER (avg): 18.0074 CTC Loss (avg): 2445.5037 time: 3.428
+2025-11-19 17:28:35,193: t15.2023.08.13 val PER: 17.5114
+2025-11-19 17:28:35,193: t15.2023.08.18 val PER: 18.4074
+2025-11-19 17:28:35,193: New best test PER inf --> 18.0074
+2025-11-19 17:28:35,193: Checkpointing model
+2025-11-19 17:28:35,227: Saved model to checkpoint: ./checkpoints/cnn_bilstm_cpu_test/best_checkpoint
+2025-11-19 17:28:36,204: Train batch 5: loss: 1726.95 grad norm: 591.55 time: 0.102
+2025-11-19 17:28:37,051: Train batch 10: loss: 2438.96 grad norm: 1164.60 time: 0.133
+2025-11-19 17:28:37,051: Running test after training batch: 10
+2025-11-19 17:28:39,115: Val batch 10: PER (avg): 0.8636 CTC Loss (avg): 2278.5908 time: 2.064
+2025-11-19 17:28:39,115: t15.2023.08.13 val PER: 0.8004
+2025-11-19 17:28:39,115: t15.2023.08.18 val PER: 0.9145
+2025-11-19 17:28:39,115: New best test PER 18.0074 --> 0.8636
+2025-11-19 17:28:39,115: Checkpointing model
+2025-11-19 17:28:39,139: Saved model to checkpoint: ./checkpoints/cnn_bilstm_cpu_test/best_checkpoint
+2025-11-19 17:28:40,168: Train batch 15: loss: 1866.92 grad norm: 1163.73 time: 0.177
+2025-11-19 17:28:41,099: Running test after training batch: 19
+2025-11-19 17:28:43,126: Val batch 19: PER (avg): 0.9689 CTC Loss (avg): 2188.6836 time: 2.026
+2025-11-19 17:28:43,126: t15.2023.08.13 val PER: 0.9854
+2025-11-19 17:28:43,126: t15.2023.08.18 val PER: 0.9556
+2025-11-19 17:28:43,126: Best avg val PER achieved: 0.86357
+2025-11-19 17:28:43,126: Total training time: 0.19 minutes
+2025-11-19 17:28:43,150: Saved model to checkpoint: ./checkpoints/cnn_bilstm_cpu_test/final_checkpoint_batch_19

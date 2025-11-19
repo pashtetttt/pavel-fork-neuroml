@@ -6,7 +6,43 @@ import redis
 from omegaconf import OmegaConf
 import time
 from tqdm import tqdm
-import editdistance
+
+# Prefer the fast C-extension `editdistance` when available. If it's not
+# installable (common on Windows without build tools), fall back to
+# `textdistance` (pure Python but fast enough), and finally a tiny
+# pure-Python Levenshtein implementation as a last resort.
+try:
+    import editdistance
+
+    def compute_edit_distance(a, b):
+        return editdistance.eval(a, b)
+except Exception:
+    try:
+        import textdistance
+
+        def compute_edit_distance(a, b):
+            # textdistance functions accept sequences.
+            return int(textdistance.levenshtein.distance(a, b))
+    except Exception:
+        # Pure-Python Levenshtein distance for sequences (words). This
+        # avoids any external dependency and works on all platforms.
+        def compute_edit_distance(a, b):
+            # a and b are sequences (lists of tokens)
+            la = len(a)
+            lb = len(b)
+            if la == 0:
+                return lb
+            if lb == 0:
+                return la
+            prev = list(range(lb + 1))
+            for i in range(1, la + 1):
+                cur = [i] + [0] * lb
+                ai = a[i - 1]
+                for j in range(1, lb + 1):
+                    cost = 0 if ai == b[j - 1] else 1
+                    cur[j] = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost)
+                prev = cur
+            return prev[lb]
 import argparse
 
 from rnn_model import GRUDecoder
@@ -23,7 +59,7 @@ parser.add_argument('--eval_type', type=str, default='test', choices=['val', 'te
                          'If "test", ground truth is not available.')
 parser.add_argument('--csv_path', type=str, default='../data/t15_copyTaskData_description.csv',
                     help='Path to the CSV file with metadata about the dataset (relative to the current working directory).')
-parser.add_argument('--gpu_number', type=int, default=1,
+parser.add_argument('--gpu_number', type=int, default=-1,
                     help='GPU number to use for RNN model inference. Set to -1 to use CPU.')
 args = parser.parse_args()
 
@@ -69,7 +105,14 @@ model = GRUDecoder(
 )
 
 # load model weights
-checkpoint = torch.load(os.path.join(model_path, 'checkpoint/best_checkpoint'), weights_only=False)
+checkpoint_path = os.path.join(model_path, 'checkpoint/best_checkpoint')
+# If CUDA is not available or the user requested CPU, map storages to CPU to avoid
+# "Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False".
+if device.type == 'cpu' or not torch.cuda.is_available():
+    checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
+else:
+    # map to the selected CUDA device (e.g., 'cuda:0')
+    checkpoint = torch.load(checkpoint_path, map_location=device)
 # rename keys to not start with "module." (happens if model was saved with DataParallel)
 for key in list(checkpoint['model_state_dict'].keys()):
     checkpoint['model_state_dict'][key.replace("module.", "")] = checkpoint['model_state_dict'].pop(key)
@@ -248,7 +291,7 @@ if eval_type == 'val':
     for i in range(len(lm_results['pred_sentence'])):
         true_sentence = remove_punctuation(lm_results['true_sentence'][i]).strip()
         pred_sentence = remove_punctuation(lm_results['pred_sentence'][i]).strip()
-        ed = editdistance.eval(true_sentence.split(), pred_sentence.split())
+        ed = compute_edit_distance(true_sentence.split(), pred_sentence.split())
 
         total_true_length += len(true_sentence.split())
         total_edit_distance += ed

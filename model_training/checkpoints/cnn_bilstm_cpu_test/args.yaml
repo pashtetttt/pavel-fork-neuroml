@@ -1,0 +1,71 @@
+mode: train
+seed: 42
+output_dir: ./output/cnn_bilstm_cpu_test
+checkpoint_dir: ./checkpoints/cnn_bilstm_cpu_test
+save_best_checkpoint: true
+save_final_model: true
+batches_per_train_log: 5
+batches_per_val_step: 10
+num_training_batches: 20
+use_amp: false
+grad_norm_clip_value: 1.0
+lr_max: 0.0003
+lr_min: 3.0e-06
+lr_scheduler_type: cosine
+lr_decay_steps: 20
+weight_decay: 0.01
+beta0: 0.9
+beta1: 0.98
+epsilon: 1.0e-09
+init_from_checkpoint: false
+init_checkpoint_path: null
+model:
+  n_input_features: 512
+  n_units: 128
+  n_cnn_layers: 2
+  cnn_dropout: 0.1
+  n_lstm_layers: 1
+  lstm_dropout: 0.1
+  input_layer_dropout: 0.1
+  cnn_trainable: true
+  lstm_trainable: true
+  input_network:
+    input_trainable: true
+dataset:
+  n_classes: 41
+  dataset_dir: ../data/hdf5_data_final
+  sessions:
+  - t15.2023.08.13
+  - t15.2023.08.18
+  batch_size: 2
+  days_per_batch: 1
+  num_dataloader_workers: 0
+  loader_shuffle: true
+  dataset_probability_val:
+  - 1
+  - 1
+  seed: 42
+  data_transforms:
+    smooth_data: true
+    smooth_kernel_std: 1.0
+    smooth_kernel_size: 5
+    white_noise_std: 0.05
+    constant_offset_std: 0.02
+    random_walk_std: 0.01
+    random_walk_axis: 1
+    random_cut: 5
+    static_gain_std: 0.01
+early_stopping: false
+early_stopping_val_steps: 5
+save_val_logits: false
+save_all_val_steps: false
+save_val_data: false
+save_val_metrics: true
+log_individual_day_val_PER: true
+log_val_skip_logs: false
+lr_max_day: 0.001
+lr_min_day: 1.0e-05
+lr_decay_steps_day: 20
+lr_warmup_steps: 5
+lr_warmup_steps_day: 5
+weight_decay_day: 0.01
