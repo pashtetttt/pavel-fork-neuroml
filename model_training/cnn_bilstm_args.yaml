@@ -9,7 +9,7 @@ save_final_model: True
 batches_per_train_log: 5  # Log more frequently for short run
 batches_per_val_step: 10  # Validate every 10 training batches (or at the end if fewer batches)
 num_training_batches: 20  # Run for only 20 batches
-use_amp: False # Disable mixed precision for CPU
+use_amp: True # True for GPU
 grad_norm_clip_value: 1.0
 lr_max: 3e-4
 lr_min: 3e-6
@@ -24,25 +24,24 @@ init_checkpoint_path: null
 
 model:
   n_input_features: 512
-  n_units: 128  # Smaller model for faster testing
-  n_cnn_layers: 2 # Fewer layers
+  n_units: 512  # bigger for gpu
+  n_cnn_layers: 4 
   cnn_dropout: 0.1
-  n_lstm_layers: 1 # Fewer layers
+  n_lstm_layers: 2 
   lstm_dropout: 0.1
   input_layer_dropout: 0.1
-  # n_classes: 41  # Move this line OUT of the 'model' section
   cnn_trainable: True
   lstm_trainable: True
   input_network:
     input_trainable: True
 
 dataset:
-  n_classes: 41 # <-- Move n_classes HERE, under the 'dataset' section
-  dataset_dir: '../data/hdf5_data_final' # Ensure this path is correct relative to where you run the script
-  sessions: ['t15.2023.08.13', 't15.2023.08.18'] # Use a couple of sessions for quick test
-  batch_size: 2 # Much smaller batch size for CPU 
+  n_classes: 41 
+  dataset_dir: '../data/hdf5_data_final' # Ensure this path is correct 
+  sessions: ['t15.2023.08.13', 't15.2023.08.18', 't15.2023.08.20', 't15.2023.08.25', 't15.2023.08.27', 't15.2023.09.01', 't15.2023.09.03', 't15.2023.09.24', 't15.2023.09.29', 't15.2023.10.01', 't15.2023.10.06', 't15.2023.10.08', 't15.2023.10.13', 't15.2023.10.15', 't15.2023.10.20', 't15.2023.10.22', 't15.2023.11.03', 't15.2023.11.04', 't15.2023.11.17', 't15.2023.11.19', 't15.2023.11.26', 't15.2023.12.03', 't15.2023.12.08', 't15.2023.12.10',  't15.2023.12.17', 't15.2023.12.29', 't15.2024.02.25', 't15.2024.03.03', 't15.2024.03.08', 't15.2024.03.15',  't15.2024.03.17', 't15.2024.04.25', 't15.2024.04.28', 't15.2024.05.10', 't15.2024.06.14', 't15.2024.07.19', 't15.2024.07.21', 't15.2024.07.28', 't15.2025.01.10', 't15.2025.01.12', 't15.2025.03.14',  't15.2025.03.16',  't15.2025.03.30', 't15.2025.04.13'] 
+  batch_size: 64 # GPU
   days_per_batch: 1
-  num_dataloader_workers: 0 # Set to 0 for CPU debugging
+  num_dataloader_workers: 4 # for zhores
   loader_shuffle: True
   dataset_probability_val: [1, 1] # Assuming these sessions are valid for val (handled by dataset.py logic)
   seed: 42
@@ -57,7 +56,7 @@ dataset:
     random_cut: 5
     static_gain_std: 0.01
 
-early_stopping: False # Probably disable for a very short test
+early_stopping: True # Probably disable for a very short test
 early_stopping_val_steps: 5
 save_val_logits: False
 save_all_val_steps: False
@@ -65,9 +64,9 @@ save_val_data: False
 save_val_metrics: True
 log_individual_day_val_PER: True
 log_val_skip_logs: False
-lr_max_day: 1e-3
+lr_max_day: 1e-3 
 lr_min_day: 1e-5
-lr_decay_steps_day: 20 # Adjust scheduler steps for day params
+lr_decay_steps_day: 20 
 lr_warmup_steps: 5
 lr_warmup_steps_day: 5
 weight_decay_day: 0.01
