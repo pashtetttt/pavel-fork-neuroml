@@ -149,7 +149,6 @@ class BrainToTextDecoder_Trainer:
         train_file_paths = [os.path.join(self.args["dataset"]["dataset_dir"], s, 'data_train.hdf5') for s in self.args['dataset']['sessions']]
         val_file_paths = [os.path.join(self.args["dataset"]["dataset_dir"], s, 'data_val.hdf5') for s in self.args['dataset']['sessions']]
 
-        # Ensure that there are no duplicate days (sessions)
         if len(set(train_file_paths)) != len(train_file_paths):
             raise ValueError("There are duplicate sessions listed in the train dataset")
         if len(set(val_file_paths)) != len(val_file_paths):
@@ -234,7 +233,6 @@ class BrainToTextDecoder_Trainer:
 
         self.logger.info("Successfully initialized datasets")
 
-        # Create optimizer, learning rate scheduler, and loss
         self.optimizer = self.create_optimizer()
 
         if self.args['lr_scheduler_type'] == 'linear':
@@ -265,7 +263,6 @@ class BrainToTextDecoder_Trainer:
             elif not self.args['model']['input_network']['input_trainable'] and 'day_' in name:
                 param.requires_grad = False
 
-        # Send model to device
         self.model.to(self.device)
 
     def create_optimizer(self):
