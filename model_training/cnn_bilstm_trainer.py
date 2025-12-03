@@ -601,11 +601,14 @@ class BrainToTextDecoder_Trainer:
                         f'time: {val_step_duration:.3f}')
 
                 if self.args['log_individual_day_val_PER']:
-                    # Note: val_metrics['day_PERs'] keys are day indices (integers)
-                    for day_idx in val_metrics['day_PERs'].keys():
-                        session_name = self.args['dataset']['sessions'][day_idx]
-                        per = val_metrics['day_PERs'][day_idx]['total_edit_distance'] / val_metrics['day_PERs'][day_idx]['total_seq_length']
-                        self.logger.info(f"{session_name} val PER: {per:0.4f}")
+                    for day in val_metrics['day_PERs'].keys():
+                        total_seq_len = val_metrics['day_PERs'][day]['total_seq_length']
+                        if total_seq_len > 0:
+                            per = val_metrics['day_PERs'][day]['total_edit_distance'] / total_seq_len
+                            self.logger.info(f"{self.args['dataset']['sessions'][day]} val PER: {per:0.4f}")
+                        else:
+                            # Skip logging for days with no validation data
+                            self.logger.info(f"{self.args['dataset']['sessions'][day]} val PER: N/A (no validation data)")
 
                 # Save metrics
                 val_PERs.append(val_metrics['avg_PER'])
